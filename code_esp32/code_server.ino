@@ -28,50 +28,93 @@ void setup() {
   Serial.print("Dirección IP: ");
   Serial.println(WiFi.localIP());  // Imprime la dirección IP asignada
 
+  // Rutas del servidor web
   server.on("/", HTTP_GET, handleRoot);
   server.on("/encender", HTTP_GET, encenderMotor);
   server.on("/apagar", HTTP_GET, apagarMotor);
 
+  // Iniciar el servidor web
   server.begin();
   Serial.println("Servidor web iniciado");
 
-  //miServo.attach(pinServo);
+  // Configuración inicial del servo
+  // miServo.attach(pinServo);
 }
 
 void loop() {
-  
-  
+  // Manejar solicitudes del cliente
   server.handleClient();
-  //for (int pos = 0; pos <= 360; pos += 1) {
-  //  miServo.write(pos);
-  //  delay(15);
-  //}
-
-  //miServo.write(0);    // Mover el servo a 0 grados
-  //delay(1000);         // Esperar 1 segundo
-  //miServo.write(90);   // Mover el servo a 90 grados
-  //delay(1000);         // Esperar 1 segundo
-  //miServo.write(200);  // Mover el servo a 180 grados
-  //delay(1000);    
 }
 
 void handleRoot() {
-  String html = "<html><body><h1>Control de Motor</h1>";
-  html += "<button><a href='/encender'>Encender Motor</a></button><br>";
-  html += "<button><a href='/apagar'>Apagar Motor</a></button><br>";
-  html += "</body></html>";
+  // Página HTML principal con AJAX
+  String html = R"rawliteral(
+  <!DOCTYPE html>
+  <html>
+  <head>
+    <title>Control de Motor</title>
+    <style>
+      body {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        font-family: Arial, sans-serif;
+        height: 100vh;
+        margin: 0;
+      }
+      h1 {
+        margin-bottom: 20px;
+      }
+      button {
+        font-size: 20px;
+        padding: 15px 30px;
+        margin: 10px;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+      }
+      button#encender {
+        background-color: green;
+        color: white;
+      }
+      button#apagar {
+        background-color: red;
+        color: white;
+      }
+    </style>
+    <script>
+      function sendCommand(command) {
+        // Crear solicitud AJAX
+        var xhr = new XMLHttpRequest();
+        xhr.open("GET", command, true);
+        xhr.send();
+      }
+    </script>
+  </head>
+  <body>
+    <h1>Control de Motor</h1>
+    <!-- Botones que llaman la función sendCommand con la ruta adecuada -->
+    <button id="encender" onclick="sendCommand('/encender')">Encender Motor</button>
+    <button id="apagar" onclick="sendCommand('/apagar')">Apagar Motor</button>
+  </body>
+  </html>
+  )rawliteral";
+
+  // Enviar la página HTML al cliente
   server.send(200, "text/html", html);
 }
 
 void encenderMotor() {
-  //digitalWrite(pinServo, HIGH);  // Encender motor
-  server.send(200, "text/html", "<html><body><h1>Motor Encendido</h1><a href='/'>Volver</a></body></html>");
+  // Encender motor (descomenta la línea adecuada para tu hardware)
+  // digitalWrite(pinServo, HIGH);
+  server.send(200, "text/plain", "Motor encendido");
   Serial.println("Motor encendido");
-
 }
 
 void apagarMotor() {
-  //digitalWrite(pinServo, LOW);  // Apagar motor
-  server.send(200, "text/html", "<html><body><h1>Motor Apagado</h1><a href='/'>Volver</a></body></html>");
+  // Apagar motor (descomenta la línea adecuada para tu hardware)
+  // digitalWrite(pinServo, LOW);
+  server.send(200, "text/plain", "Motor apagado");
   Serial.println("Motor apagado");
 }
